@@ -19,18 +19,38 @@ func init() {
 var initCmd = &cobra.Command{
 	Use:   "init [project name] [repository template]",
 	Short: "Initialize a new Go module",
-	Args:  cobra.ExactArgs(3),
 	Run:   runInitCmd,
 }
 
 func runInitCmd(cmd *cobra.Command, args []string) {
 	_, err := utils.ReadEinarCli()
+
 	if err == nil {
 		fmt.Println("einar cli already initialized")
 		return
 	}
-	repositoryURL := args[1]
-	templatePath, err := utils.GitCloneTemplateInBinaryPath(repositoryURL, args[2], "")
+
+	var repositoryURL string
+	var userCredentials string
+	var invalidArgsQuantity bool = true
+	if len(args) == 1 {
+		repositoryURL = "https://github.com/Ignaciojeria/einar-cli-standard-template"
+		userCredentials = "no-auth"
+		invalidArgsQuantity = false
+	}
+
+	if len(args) == 3 {
+		repositoryURL = args[1]
+		userCredentials = args[2]
+		invalidArgsQuantity = false
+	}
+
+	if invalidArgsQuantity {
+		fmt.Println("accept 1 or 3 args only")
+		return
+	}
+
+	templatePath, err := utils.GitCloneTemplateInBinaryPath(repositoryURL, userCredentials, "")
 	if err != nil {
 		fmt.Println("error getting template path")
 		return
@@ -51,7 +71,7 @@ func runInitCmd(cmd *cobra.Command, args []string) {
 	err = utils.CreateEinarCLIJSON(domain.EinarCli{
 		Project: args[0],
 		Template: domain.Template{
-			URL: args[1],
+			URL: repositoryURL,
 			Tag: tag,
 		},
 	})
