@@ -66,6 +66,7 @@ var EinarGenerate in.EinarGenerate = func(ctx context.Context, project string, c
 	}
 
 	if installCommand.Kind == "" {
+		fmt.Printf("%s command not found in .einar.template.json", componentKind)
 		return fmt.Errorf("%s command not found in .einar.template.json", componentKind)
 	}
 
@@ -176,6 +177,7 @@ var EinarGenerate in.EinarGenerate = func(ctx context.Context, project string, c
 			return fmt.Errorf("error copying file from %s to %s: %v for project %v", sourcePath, destinationPath, err, project)
 		}
 		fmt.Printf("File copied successfully from %s to %s.\n", sourcePath, destinationPath)
+		componentName = nestedFolders + componentName
 	}
 	return nil
 }
