@@ -149,16 +149,12 @@ func initializeGoModule(dependencies []string, project string) error {
 		return err
 	}
 
-	// Get dependencies
-	for _, dependency := range dependencies {
-		goGetCmd := exec.Command("go", "get", dependency)
-		goGetCmd.Dir = ""
-		err := goGetCmd.Run()
-		if err != nil {
-			err := fmt.Errorf("error getting dependency %s %s", dependency, err)
-			fmt.Println(err)
-			return err
-		}
+	goGetCmd := exec.Command("go", "get")
+	goGetCmd.Dir = ""
+	err = goGetCmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
 
 	// Print success message
