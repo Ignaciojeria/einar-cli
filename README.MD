@@ -13,7 +13,7 @@ With EinarCLI, get ready to turn up the heat 🔥 on your programming skills and
 ## 🔧 Installation
 To install EinarCLI, use the following command:
 
-    go install github.com/Ignaciojeria/einar@v1.40.0
+    go install github.com/Ignaciojeria/einar@v1.42.0
 
 Read DOCS : 
 https://ignaciojeria.github.io/
