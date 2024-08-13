@@ -110,17 +110,18 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 		}
 
 		fmt.Printf("%s directory cloned successfully to %s.\n", commandName, destDir)
-
-		for _, lib := range installCommand.Libraries {
-			cmd := exec.Command("go", "get", lib)
-			cmd.Dir = "" /*project*/
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err := cmd.Run()
-			if err != nil {
-				return fmt.Errorf("error installing %s library %s: %v", commandName, lib, err)
+		/*
+			for _, lib := range installCommand.Libraries {
+				cmd := exec.Command("go", "get", lib)
+				cmd.Dir = ""
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				err := cmd.Run()
+				if err != nil {
+					return fmt.Errorf("error installing %s library %s: %v", commandName, lib, err)
+				}
 			}
-		}
+		*/
 
 		if !folder.IocDiscovery {
 			continue
@@ -158,16 +159,18 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 
 		fmt.Printf("%s directory cloned successfully to %s.\n", commandName, destDir)
 
-		for _, lib := range installCommand.Libraries {
-			cmd := exec.Command("go", "get", lib)
-			cmd.Dir = "" /*project*/
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err := cmd.Run()
-			if err != nil {
-				return fmt.Errorf("error installing %s library %s: %v", commandName, lib, err)
+		/*
+			for _, lib := range installCommand.Libraries {
+				cmd := exec.Command("go", "get", lib)
+				cmd.Dir = ""
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				err := cmd.Run()
+				if err != nil {
+					return fmt.Errorf("error installing %s library %s: %v", commandName, lib, err)
+				}
 			}
-		}
+		*/
 
 		if !file.IocDiscovery {
 			continue
@@ -183,6 +186,15 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 
 	if err := addInstallationInsideCli( /*"project"*/ "", commandName); err != nil {
 		return fmt.Errorf("failed to update .einar.template.json: %v", err)
+	}
+
+	cmd := exec.Command("go", "get")
+	cmd.Dir = ""
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("error execugint go get for %s : %v", commandName, err)
 	}
 
 	return nil
