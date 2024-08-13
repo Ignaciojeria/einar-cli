@@ -34,7 +34,7 @@ func runInitCmd(cmd *cobra.Command, args []string) {
 	var userCredentials string
 	var invalidArgsQuantity bool = true
 	if len(args) == 1 {
-		repositoryURL = "https://github.com/Ignaciojeria/einar-cli-standard-template"
+		repositoryURL = "https://github.com/Ignaciojeria/einar-cli-template-v2"
 		userCredentials = "no-auth"
 		invalidArgsQuantity = false
 	}
