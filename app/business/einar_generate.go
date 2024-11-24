@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/Ignaciojeria/einar/app/domain"
@@ -61,18 +62,21 @@ var EinarGenerate in.EinarGenerate = func(
 		return fmt.Errorf("error unmarshalling JSON file: %v for project %v", err, project)
 	}
 
-	var installCommand domain.ComponentCommands
+	var installCommands []domain.ComponentCommands
 	for _, command := range template.ComponentCommands {
 		if command.Kind == componentKind {
-			installCommand = command
-			break
+			installCommands = append(installCommands, command)
 		}
 	}
 
-	if installCommand.Kind == "" {
+	if len(installCommands) == 0 {
 		fmt.Printf("%s command not found in .einar.template.json", componentKind)
 		return fmt.Errorf("%s command not found in .einar.template.json", componentKind)
 	}
+
+	installCommands = GetInstallCommandWithHighestMatches(
+		cli,
+		installCommands)
 
 	for _, v := range cli.Components {
 		if v.Kind == componentKind && v.Name == componentName {
@@ -82,7 +86,7 @@ var EinarGenerate in.EinarGenerate = func(
 	}
 
 	var dependencyIsPresent bool
-	for _, dependency := range installCommand.DependsOn {
+	for _, dependency := range installCommands[0].DependsOn {
 		if dependency == "" {
 			dependencyIsPresent = true
 			break
@@ -101,7 +105,7 @@ var EinarGenerate in.EinarGenerate = func(
 
 	if !dependencyIsPresent {
 		fmt.Println("Some dependencies are missing. Please install the following dependencies:")
-		for _, v := range installCommand.DependsOn {
+		for _, v := range installCommands[0].DependsOn {
 			fmt.Println("einar install " + v)
 		}
 		return errors.New("dependencies are not present")
@@ -114,7 +118,7 @@ var EinarGenerate in.EinarGenerate = func(
 	}
 
 	// Iterate over the Files slice
-	for _, file := range installCommand.ComponentFiles {
+	for _, file := range installCommands[0].ComponentFiles {
 
 		// Extract the final component name and construct the nested folder structure
 		componentParts := strings.Split(componentName, "/")
@@ -261,4 +265,50 @@ func addComponentInsideCli(componentKind string, componentName string) error {
 	}
 
 	return nil
+}
+
+func GetInstallCommandWithHighestMatches(
+	cli domain.EinarCli,
+	installCommands []domain.ComponentCommands) []domain.ComponentCommands {
+	// Crear un mapa para almacenar los conteos de coincidencias
+	type commandMatch struct {
+		command domain.ComponentCommands
+		matches int
+	}
+
+	commandMatches := make([]commandMatch, 0)
+
+	// Iterar sobre los installCommands
+	for _, cmd := range installCommands {
+		matchCount := 0
+		//	fmt.Printf("Checking command: %s\n", cmd.Kind)
+		// Contar las coincidencias con las instalaciones en cli.Installations
+		for _, dep := range cmd.DependsOn {
+			for _, inst := range cli.Installations {
+				//			fmt.Printf("Comparing dependency '%s' with installation '%s' and unique '%s'\n", dep, inst.Name, inst.Unique)
+				if dep == inst.Name || dep == inst.Unique {
+					//		fmt.Printf("Match found: dependency '%s' matches installation '%s' or unique '%s'\n", dep, inst.Name, inst.Unique)
+					matchCount++
+					// break // Este break podría estar causando un conteo incorrecto
+				}
+			}
+		}
+		//	fmt.Printf("Total matches for command '%s': %d\n", cmd.Kind, matchCount)
+		// Agregar el comando y el conteo al slice
+		commandMatches = append(commandMatches, commandMatch{command: cmd, matches: matchCount})
+	}
+
+	// Ordenar los comandos por número de coincidencias (de mayor a menor)
+	sort.SliceStable(commandMatches, func(i, j int) bool {
+		return commandMatches[i].matches > commandMatches[j].matches
+	})
+
+	// Convertir commandMatches en un slice de InstallCommand ordenado
+	sortedCommands := make([]domain.ComponentCommands, len(commandMatches))
+	for i, cm := range commandMatches {
+		//	fmt.Printf("Sorted command #%d: %s with matches: %d\n", i+1, cm.command.Kind, cm.matches)
+		sortedCommands[i] = cm.command
+	}
+
+	return sortedCommands
 }
