@@ -70,6 +70,16 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 		return fmt.Errorf("%s command not found in .einar.template.json", commandName)
 	}
 
+	// Validate unique field
+	for _, existingInstallation := range cli.Installations {
+		if installCommand.Unique == "" {
+			continue // Skip empty unique values
+		}
+		if existingInstallation.Unique == installCommand.Unique {
+			return fmt.Errorf("installation with unique '%s' already exists", installCommand.Unique)
+		}
+	}
+
 	if installCommand.SourceDir != "" && installCommand.DestinationDir != "" {
 		installCommand.Folders = append(installCommand.Folders,
 			domain.InstallationFolder{
@@ -82,6 +92,7 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 	installationsMap := make(map[string]bool)
 	for _, installation := range cli.Installations {
 		installationsMap[installation.Name] = true
+		installationsMap[installation.Unique] = true
 	}
 
 	// Verificar si las dependencias están presentes
@@ -110,18 +121,6 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 		}
 
 		fmt.Printf("%s directory cloned successfully to %s.\n", commandName, destDir)
-		/*
-			for _, lib := range installCommand.Libraries {
-				cmd := exec.Command("go", "get", lib)
-				cmd.Dir = ""
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				err := cmd.Run()
-				if err != nil {
-					return fmt.Errorf("error installing %s library %s: %v", commandName, lib, err)
-				}
-			}
-		*/
 
 		if !folder.IocDiscovery {
 			continue
@@ -158,19 +157,6 @@ var EinarInstall in.EinarInstall = func(ctx context.Context, project, commandNam
 		}
 
 		fmt.Printf("%s directory cloned successfully to %s.\n", commandName, destDir)
-
-		/*
-			for _, lib := range installCommand.Libraries {
-				cmd := exec.Command("go", "get", lib)
-				cmd.Dir = ""
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				err := cmd.Run()
-				if err != nil {
-					return fmt.Errorf("error installing %s library %s: %v", commandName, lib, err)
-				}
-			}
-		*/
 
 		if !file.IocDiscovery {
 			continue
@@ -257,6 +243,7 @@ func addInstallationInsideCli(project, commandName string) error {
 	cli.Installations = append(cli.Installations, domain.Installation{
 		Name:      command.Name,
 		Libraries: command.Libraries,
+		Unique:    command.Unique,
 	})
 
 	// write back the updated einar.cli.json

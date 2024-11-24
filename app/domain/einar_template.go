@@ -39,6 +39,7 @@ type InstallationFile struct {
 
 type InstallationCommand struct {
 	Name           string               `json:"name"`
+	Unique         string               `json:"unique"`
 	SourceDir      string               `json:"source_dir"`
 	DestinationDir string               `json:"destination_dir"`
 	Folders        []InstallationFolder `json:"folders"`
@@ -61,14 +62,15 @@ type ComponentCommands struct {
 }
 
 type ComponentFile struct {
-	SourceFile      string          `json:"source_file"`
-	DestinationDir  string          `json:"destination_dir"`
-	IocDiscovery    bool            `json:"ioc_discovery"`
-	HasComponentDir bool            `json:"has_component_dir"`
-	AppendAtStart   string          `json:"append_at_start"`
-	AppendAtEnd     string          `json:"append_at_end"`
-	Port            Port            `json:"port"`
-	ReplaceHolders  []ReplaceHolder `json:"replace_holders"`
+	SourceFile          string               `json:"source_file"`
+	DestinationDir      string               `json:"destination_dir"`
+	IocDiscovery        bool                 `json:"ioc_discovery"`
+	HasComponentDir     bool                 `json:"has_component_dir"`
+	AppendAtStart       string               `json:"append_at_start"`
+	AppendAtEnd         string               `json:"append_at_end"`
+	Port                Port                 `json:"port"`
+	ReplaceHolders      []ReplaceHolder      `json:"replace_holders"`
+	LiteralReplacements []LiteralReplacement `json:"literal_replacements"`
 }
 
 type Port struct {
@@ -81,4 +83,9 @@ type ReplaceHolder struct {
 	Name          string `json:"name"`
 	AppendAtStart string `json:"append_at_start"`
 	AppendAtEnd   string `json:"append_at_end"`
+}
+
+type LiteralReplacement struct {
+	Target      string `json:"target"`
+	Replacement string `json:"replacement"`
 }

@@ -14,7 +14,11 @@ import (
 	"github.com/Ignaciojeria/einar/app/shared/utils"
 )
 
-var EinarGenerate in.EinarGenerate = func(ctx context.Context, project string, componentKind string, componentName string) error {
+var EinarGenerate in.EinarGenerate = func(
+	ctx context.Context,
+	project string,
+	componentKind string,
+	componentName string) error {
 
 	// read einar.cli.json
 	cliPath := filepath.Join(".einar.cli.json")
@@ -85,6 +89,10 @@ var EinarGenerate in.EinarGenerate = func(ctx context.Context, project string, c
 		}
 		for _, installation := range cli.Installations {
 			if dependency == installation.Name {
+				dependencyIsPresent = true
+				break
+			}
+			if dependency == installation.Unique {
 				dependencyIsPresent = true
 				break
 			}
@@ -160,7 +168,11 @@ var EinarGenerate in.EinarGenerate = func(ctx context.Context, project string, c
 					utils.ConvertStringCase(componentName, v.Kind)+
 					v.AppendAtEnd)
 		}
-		// Copy the file
+
+		for _, v := range file.LiteralReplacements {
+			placeHolders = append(placeHolders, v.Target)
+			placeHoldersReplace = append(placeHoldersReplace, v.Replacement)
+		}
 
 		if file.Port.SourceFile != "" {
 			sourcePath := filepath.Join(templateFolderPath, file.Port.SourceFile)

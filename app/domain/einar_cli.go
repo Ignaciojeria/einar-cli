@@ -14,6 +14,7 @@ type Template struct {
 
 type Installation struct {
 	Name      string   `json:"name"`
+	Unique    string   `json:"unique"`
 	Libraries []string `json:"libraries"`
 }
 

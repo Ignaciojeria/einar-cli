@@ -1,8 +1,8 @@
 {
     "project": "github.com/Ignaciojeria/einar",
     "template": {
-        "tag": "1.0.0",
-        "url": "https://github.com/Ignaciojeria/einar-cli-template"
+        "tag": "v5.9.0",
+        "url": "https://github.com/Ignaciojeria/einar-cli-standard-template"
     },
     "installations": [
         {
